@@ -8,28 +8,23 @@ import photo5 from '../photos/photo_2026-03-08 15.43.54.jpeg';
 const toys = [
   {
     title: 'Снегурочка из ваты',
-    image: photo1,
-    description: 'Ручная работа в винтажной стилистике.'
+    image: photo1
   },
   {
     title: 'Дед Мороз на елку',
-    image: photo2,
-    description: 'Классическая новогодняя игрушка из ваты.'
+    image: photo2
   },
   {
     title: 'Елочный ангел',
-    image: photo3,
-    description: 'Нежный декор для елки и подарочных наборов.'
+    image: photo3
   },
   {
     title: 'Зайчик в шубке',
-    image: photo4,
-    description: 'Ватная фигурка в ретро-новогоднем стиле.'
+    image: photo4
   },
   {
     title: 'Праздничный набор',
-    image: photo5,
-    description: 'Комплект игрушек в единой цветовой гамме.'
+    image: photo5
   }
 ];
 
@@ -54,15 +49,43 @@ const links = [
 
 export default function App() {
   const [activeSlide, setActiveSlide] = useState(0);
-  const maxStartSlide = Math.max(0, toys.length - 2);
+  const [slideDirection, setSlideDirection] = useState(null);
+
+  const visibleToys = [
+    toys[(activeSlide - 1 + toys.length) % toys.length],
+    toys[activeSlide],
+    toys[(activeSlide + 1) % toys.length],
+    toys[(activeSlide + 2) % toys.length]
+  ];
 
   const prevSlide = () => {
-    setActiveSlide((current) => (current === 0 ? maxStartSlide : current - 1));
+    if (slideDirection) {
+      return;
+    }
+    setSlideDirection('prev');
   };
 
   const nextSlide = () => {
-    setActiveSlide((current) => (current >= maxStartSlide ? 0 : current + 1));
+    if (slideDirection) {
+      return;
+    }
+    setSlideDirection('next');
   };
+
+  const handleTransitionEnd = () => {
+    if (slideDirection === 'next') {
+      setActiveSlide((current) => (current + 1) % toys.length);
+    }
+
+    if (slideDirection === 'prev') {
+      setActiveSlide((current) => (current === 0 ? toys.length - 1 : current - 1));
+    }
+
+    setSlideDirection(null);
+  };
+
+  const trackTransform =
+    slideDirection === 'next' ? 'translateX(-100%)' : slideDirection === 'prev' ? 'translateX(0%)' : 'translateX(-50%)';
 
   return (
     <div className="page">
@@ -70,20 +93,19 @@ export default function App() {
         <p className="hero-tag">Ватные новогодние игрушки</p>
         <h1>Рукоделие с Душой</h1>
         <p>
-          Делаю елочные игрушки из ваты на заказ: ручная лепка, аккуратная
-          роспись и бережная упаковка для подарка или вашей коллекции.
+          Не Китай и не конвейер. Каждую игрушку я изготавливаю вручную.
         </p>
       </header>
 
       <main>
         <section className="order-bar" aria-label="Заказ игрушек">
           <strong>Любую игрушку можно заказать напрямую со скидкой</strong>
-          <span>Доставка через Яндекс или СДЭК по вашему адресу</span>
+          <span>Отправка из Москвы через Яндекс или СДЭК</span>
         </section>
 
         <section className="section">
           <div className="section-head">
-            <h2>Фото-примеры игрушек</h2>
+            <h2>Примеры игрушек</h2>
           </div>
 
           <div className="toy-slider" aria-label="Примеры ватных игрушек">
@@ -98,16 +120,13 @@ export default function App() {
 
             <div className="toy-carousel-window">
               <div
-                className="toy-carousel-track"
-                style={{ transform: `translateX(-${activeSlide * 50}%)` }}
+                className={`toy-carousel-track${slideDirection ? ' is-animating' : ''}`}
+                style={{ transform: trackTransform }}
+                onTransitionEnd={handleTransitionEnd}
               >
-                {toys.map((toy) => (
-                  <article key={toy.title} className="toy-slide">
+                {visibleToys.map((toy, index) => (
+                  <article key={`${toy.title}-${index}`} className="toy-slide">
                     <img src={toy.image} alt={toy.title} loading="lazy" />
-                    <div className="toy-card-body">
-                      <h3>{toy.title}</h3>
-                      <p>{toy.description}</p>
-                    </div>
                   </article>
                 ))}
               </div>
@@ -121,6 +140,22 @@ export default function App() {
             >
               →
             </button>
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="section-head">
+            <h2>Почему эти игрушки особенные</h2>
+            <p>
+              Ручная работа по старинной технологии, каждая игрушка в единственном экземпляре.
+            </p>
+          </div>
+
+          <div className="about-copy">
+            <p>Подойдет и для елки, и для уютного новогоднего интерьера.</p>
+            <p>Используются хлопковая вата, проволока, клейстер, акриловые краски и лак.</p>
+            <p>Каждая игрушка упаковывается в надежную коробку и подходит для подарка.</p>
+            <p>Все игрушки в наличии и отправляются без задержек.</p>
           </div>
         </section>
 
@@ -149,7 +184,7 @@ export default function App() {
         <section className="section contacts">
           <div className="section-head">
             <h2>Где заказать</h2>
-            <p>Выберите удобную площадку</p>
+            <p>Выберите удобную площадку для заказа</p>
           </div>
 
           <div className="links-grid">
